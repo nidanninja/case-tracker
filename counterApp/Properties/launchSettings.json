@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "counterApp": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\royal\\OneDrive\\Documents\\Projects"
+    }
+  }
+}
