@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using static System.Net.Mime.MediaTypeNames;
 using System;
 using System.Printing;
+using System.Reflection;
 
 namespace counterApp
 {
@@ -32,6 +33,26 @@ namespace counterApp
         {
             InitializeComponent();
             oldDate = DateExists();
+        }
+
+        private void Window_Deactivated(object sender, EventArgs e)
+        {
+            if ((bool)boxOnTop.IsChecked)
+            {
+                StayOnTop();
+            }
+            else
+            {
+                Main_Window.Topmost = false;
+                Main_Window.Activate();
+            }
+        }
+
+        private void StayOnTop()
+        {
+            Window window = (Window)Main_Window;
+            window.Topmost = true;
+            window.Activate();
         }
 
         private void IncrementDigital(object sender, RoutedEventArgs e)

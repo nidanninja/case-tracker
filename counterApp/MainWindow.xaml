@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:counterApp"
         mc:Ignorable="d"
+        Deactivated="Window_Deactivated"
+        x:Name="Main_Window"
         Title="MainWindow" Height="450" Width="800">
     <Viewbox Height="Auto" Width="Auto" Stretch="Fill">
         <Grid>
@@ -34,10 +36,12 @@
                 <Button Content="+1 Error" FontSize="20" Click="IncrementRemovableError" Height="36" Canvas.Top="268" Width="189"/>
                 <TextBlock TextWrapping="Wrap" Text="errors" FontSize="20" Height="27" Canvas.Left="138" Canvas.Top="27" Width="64"/>
             </Canvas>
+            <CheckBox Content="Stay On Top of All Windows" x:Name="boxOnTop" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top"/>
             <Button Content="Info" FontSize="20" Margin="10,10,608,349" Click="InfoPopup"/>
             <DatePicker x:Name="EditDate" HorizontalAlignment="Left" Margin="218,10,0,0" VerticalAlignment="Top" Height="44" Width="120" SelectedDateChanged="DateChange" />
             <Button Content="Reset" FontSize="22" Margin="495,10,197,349" Click="Reset"/>
             <Button Content="Sort File By Date" HorizontalAlignment="Left" Margin="629,343,0,0" VerticalAlignment="Top" Height="50" Width="120"/>
+            
         </Grid>
     </Viewbox>
 </Window>
