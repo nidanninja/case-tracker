@@ -22,12 +22,14 @@ namespace counterApp
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        // has data been exported yet for current date?
         private Boolean DataExported = false;
+        
+        // does the file exist?
         private Boolean fileExists = false;
 
+        // store old date whenever date is changed
         private DateTime oldDate = new DateTime();
-
 
         public MainWindow()
         {
@@ -35,6 +37,9 @@ namespace counterApp
             oldDate = DateExists();
         }
 
+
+        // window deactivate event handler; when window is deactivated, if Stay On Top is checked, keep window on top
+        // if user unchecks Stay On Top, then do not keep on top
         private void Window_Deactivated(object sender, EventArgs e)
         {
             if ((bool)boxOnTop.IsChecked)
@@ -48,6 +53,7 @@ namespace counterApp
             }
         }
 
+        // call to ensure window stays on top of all other windows - currently only used on window deactivated event
         private void StayOnTop()
         {
             Window window = (Window)Main_Window;
@@ -55,6 +61,7 @@ namespace counterApp
             window.Activate();
         }
 
+        // adjust values for digital cases - any type
         private void IncrementDigital(object sender, RoutedEventArgs e)
         {
             int DigitalCounter = Convert.ToInt32(DigitalCount.Text);
@@ -68,6 +75,7 @@ namespace counterApp
             DataExported = false;
         }
 
+        // adjust values for fixed traditional cases - crowns, etc
         private void IncrementFixed(object sender, RoutedEventArgs e)
         {
             int FixedCounter = Convert.ToInt32(FixedCount.Text);
@@ -81,6 +89,7 @@ namespace counterApp
             DataExported = false;
         }
 
+        // adjust values for removable traditional cases - dentures, etc
         private void IncrementRemovable(object sender, RoutedEventArgs e)
         {
             int RemovableCounter = Convert.ToInt32(RemovableCount.Text);
@@ -94,11 +103,14 @@ namespace counterApp
             DataExported = false;
         }
 
+
+        // pop up information about the program for users
         private void InfoPopup(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("This tool is used to keep track of all cases entered of a given type throughout the day. If you make any errors, you can click the smaller \"+1 Error\" buttons to add an error for that category. \n\nAt the end of the day, when you are finished entering cases, you can click the Export button to save your case counts as a .CSV file (which is openable with Microsoft Excel). This lets you keep track of how many cases you enter each day without needing to keep sticky notes, and you can go back and edit it any time!\n\n(Exported CSV files will be stored inside a folder called CaseTracking, where this program is located) \n\nKeep in mind that if you are notified of an error from a previous day you will need to manually select that date to edit the error count - by default this program only tracks the current day's errors.\n\nThanks for using Bo's case tracker!");
         }
 
+        // reset all counters to zero
         private void Reset()
         {
             DigitalCount.Text = "0";
@@ -110,14 +122,18 @@ namespace counterApp
             DataExported = false;
         }
 
+        // event handler for reset button; call default reset function
         private void Reset(object sender, RoutedEventArgs e)
         {
             Reset();
         }
 
-
+        // has the date been returned back to the previous date (after attempting to change date without export)?
         private Boolean dateReturned = false;
 
+        // programmatically set the date picker to the previous date;
+        // this is to fix issues with changing date when data has not been exported yet
+        // this also has to temporarily disable the selected date changed event to prevent it from throwing errors
         private void SetDatePicker()
         {
             if (EditDate != null) {
@@ -127,6 +143,8 @@ namespace counterApp
                 EditDate.SelectedDateChanged += DateChange;
             }
         }
+
+        // same as previous SetDatePicker() but set to a specific date rather than previous
         private void SetDatePicker(DateTime d)
         {
             if (EditDate != null)
@@ -138,6 +156,7 @@ namespace counterApp
             }
         }
 
+        // check whether date picker is still null/current date, or if it has been modified
         private Boolean IsDatePickerStillDefault()
         {
             if (EditDate.SelectedDate == null || EditDate.SelectedDate == DateTime.UtcNow)
@@ -146,6 +165,11 @@ namespace counterApp
             }
             return false;
         }
+
+        // date picker selected date change event handler
+        // gives warning if data has not been exported and warning has not yet popped up; if warning is declined then date is changed again it will skip the warning
+        // checks whether file exists; if it does, it will read and find data for selected date and set values accordingly
+        // also updates "oldDate" to ensure that we can return to the previous date if needed
         private void DateChange(object? sender, RoutedEventArgs e)
         {
             Boolean defaultDate = IsDatePickerStillDefault();
@@ -192,16 +216,17 @@ namespace counterApp
             return;
         }
 
+        // currently unused; placeholder method to get data with default date
         private string[] GetData()
         {
             return GetData(DateExists());
         }
 
+        // read and parse data from existing CSV file
+        // then return data in proper format as string array to be used elsewhere
         private string[] GetData(DateTime date)
         {
             string path = GetFile(date);
-
-
             //var headerLine = "DATE,DIGITAL CASES,DIGITAL ERRORS,TRADITIONAL FIXED CASES,TRADITIONAL FIXED ERRORS,REMOVABLE CASES,REMOVABLE ERRORS,TOTAL CASES ENTERED,TOTAL ERRORS,ERROR PERCENT";
             //var caseLine = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}", editDay, DigitalCases, DigitalErrors, FixedCases, FixedErrors, RemovableCases, RemovableErrors, TotalCasesEntered.ToString(), TotalErrors.ToString(), ErrorPercent.ToString());
             int index = DateExistsInFile(date);
@@ -211,6 +236,7 @@ namespace counterApp
 
         }
 
+        // validate date in date picker as a valid date and return it; if not, set the date picker control to default current date then return
         private DateTime DateExists()
         {
             DateTime d;
@@ -226,6 +252,8 @@ namespace counterApp
             return d;
         }
 
+        // default method to get file path using DateExists() date
+        // which is usually the date picker selected date
         private string GetFile()
         {
             return GetFile(DateExists());
@@ -237,6 +265,7 @@ namespace counterApp
             //return filePath;
         }
 
+        // get file path using date passed in to method by returning it in the format "M-YYYY.csv"
         private string GetFile(DateTime date)
         {
             var editMonth = date.Month.ToString() + "-" + date.Year.ToString();
@@ -245,6 +274,7 @@ namespace counterApp
             return filePath;
         }
 
+        // get file lines as string array using default file path from GetFile(), also using FileCheck(GetFile()) to ensure file is readable
         private string[] GetFileAsArray()
         {
             FileCheck(GetFile());
@@ -257,9 +287,10 @@ namespace counterApp
             return linesInFile;
         }
 
+        // get file lines as string array using path passed into method, similar to above
         private string[] GetFileAsArray(string path)
         {
-            string[] linesInFile = new string[0];
+            string[] linesInFile = [];
             if (NoFileError(FileCheck(GetFile())))
             {
                 linesInFile = File.ReadAllLines(@path);
@@ -272,14 +303,17 @@ namespace counterApp
         }
 
 
-        // FileCheck determines whether the file exists, and if the file is readable.
-        // If the file exists and is not readable, it will display a message box to the user
-        // warning them to close the file so the program may continue.
+        // default FileCheck method; passes default b value of 0
         private string FileCheck(string path)
         {
             return FileCheck(path, 0);
         }
 
+        // FileCheck determines whether the file exists, and if the file is readable.
+        // If the file exists and is not readable, it will display a message box to the user
+        // warning them to close the file so the program may continue.
+
+        // int b is currently unused; previously implemented to allow recursive call if needed but currently not necessary
         private string FileCheck(string path, int b)
         {
             DateTime dateTime = DateExists();
@@ -334,7 +368,8 @@ namespace counterApp
             return "Error!";
         }
 
-
+        // verify no file errors using returned string of FileCheck(); allows implementation of the same error dialog without repeating code
+        // currently only needed in a few places but may need to be reused as program expands
         private Boolean NoFileError(string temp)
         {
             if (temp == "Error!" && fileExists)
@@ -349,6 +384,8 @@ namespace counterApp
             return true;
         }
 
+        // verify whether the date given exists in the file; if so, return the index at which it exists
+        // if the date does not exist, return -1
         private int DateExistsInFile(DateTime dateTime)
         {
             FileCheck(GetFile(dateTime));
@@ -382,6 +419,7 @@ namespace counterApp
             return -1;
         }
 
+        // used only when sorting file; ensures that all dates are in order from earliest to latest from top to bottom
         private void CleanupFile(string path)
         {
             string[] linesInFile = File.ReadAllLines(@path);
@@ -397,6 +435,9 @@ namespace counterApp
             File.WriteAllLines(@path, linesInFile);
         }
 
+        // export button event handler; contains all logic for exporting data and validation of data to be exported
+        // saves data to "./CaseTracking/M-YYYY.csv" path from GetFile() return value
+        // additionally calculates total cases and error percentage using user data
         private void ExportData(object sender, RoutedEventArgs e)
         {
             /* We want to be able to store and edit data for any given day of the month.
