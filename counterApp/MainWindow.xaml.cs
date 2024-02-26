@@ -186,6 +186,14 @@ namespace counterApp
             }
             DateTime dateTime = DateExists();
             FileCheck(GetFile(dateTime));
+            LoadData(dateTime);
+            return;
+        }
+
+        // Load data for a specific day - primarily used with DateChange event trigger to check when date is changed
+        // Check if date exists, and if so, load data into appropriate controls and display message to user
+        private void LoadData(DateTime dateTime)
+        {
             if (fileExists)
             {
                 if (DateExistsInFile(dateTime) >= 0)
@@ -213,7 +221,6 @@ namespace counterApp
                 oldDate = dateTime;
                 dateReturned = false;
             }
-            return;
         }
 
         // currently unused; placeholder method to get data with default date
@@ -246,8 +253,11 @@ namespace counterApp
             }
             else
             {
+                // set date to default date; today
                 d = DateTime.UtcNow;
                 SetDatePicker(d);
+                FileCheck(GetFile(d));
+                LoadData(d);
             }
             return d;
         }
