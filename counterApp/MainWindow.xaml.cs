@@ -14,6 +14,8 @@ using static System.Net.Mime.MediaTypeNames;
 using System;
 using System.Printing;
 using System.Reflection;
+using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace counterApp
 {
@@ -32,12 +34,52 @@ namespace counterApp
         private DateTime oldDate = new DateTime();
 
         // bool to check whether the date is still default or if it has been changed at least once
-        private bool defaultDate = true; 
+        private bool defaultDate = true;
+
+        /// <summary>
+        /// adding a stopwatch feature to track time spent on case entry vs. on other tasks
+        /// </summary>
+        DispatcherTimer dt = new DispatcherTimer();  
+        Stopwatch sw = new Stopwatch();
+        string currentTime = string.Empty;
+
+
 
         public MainWindow()
         {
             InitializeComponent();
             oldDate = DateExists();
+            dt.Tick += new EventHandler(dt_Tick);
+            dt.Interval = new TimeSpan(0, 0, 0, 0, 1);
+        }
+
+        void dt_Tick(object sender, EventArgs e)
+        {
+            if (sw.IsRunning)
+            {
+                TimeSpan ts = sw.Elapsed;
+                currentTime = String.Format("{0:00}:{1:00}:{2:00}",
+                ts.Hours, ts.Minutes, ts.Seconds);
+                clocktxtblock.Text = currentTime;
+            }
+        }
+        private void startbtn_Click(object sender, RoutedEventArgs e)
+        {
+            sw.Start();
+            dt.Start();
+            startbtn.Background = Brushes.Gray;
+            stopbtn.Background = Brushes.IndianRed;
+        }
+
+        private void stopbtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+                elapsedtimeitem.Items.Add(currentTime);
+            }
+            startbtn.Background = Brushes.MediumSpringGreen;
+            stopbtn.Background = Brushes.Gray;
         }
 
 
