@@ -23,13 +23,16 @@ namespace counterApp
     public partial class MainWindow : Window
     {
         // has data been exported yet for current date?
-        private Boolean DataExported = false;
+        private bool DataExported = false;
         
         // does the file exist?
-        private Boolean fileExists = false;
+        private bool fileExists = false;
 
         // store old date whenever date is changed
         private DateTime oldDate = new DateTime();
+
+        // bool to check whether the date is still default or if it has been changed at least once
+        private bool defaultDate = true; 
 
         public MainWindow()
         {
@@ -49,7 +52,7 @@ namespace counterApp
             else
             {
                 Main_Window.Topmost = false;
-                Main_Window.Activate();
+                // Main_Window.Activate(); // this line has been removed, as this would cause the taskbar icon to flash repeatedly
             }
         }
 
@@ -58,7 +61,7 @@ namespace counterApp
         {
             Window window = (Window)Main_Window;
             window.Topmost = true;
-            window.Activate();
+            // window.Activate(); // see above in Window_Deactivated()
         }
 
         // adjust values for digital cases - any type
@@ -129,7 +132,7 @@ namespace counterApp
         }
 
         // has the date been returned back to the previous date (after attempting to change date without export)?
-        private Boolean dateReturned = false;
+        private bool dateReturned = false;
 
         // programmatically set the date picker to the previous date;
         // this is to fix issues with changing date when data has not been exported yet
@@ -157,12 +160,13 @@ namespace counterApp
         }
 
         // check whether date picker is still null/current date, or if it has been modified
-        private Boolean IsDatePickerStillDefault()
+        private bool IsDatePickerStillDefault()
         {
             if (EditDate.SelectedDate == null || EditDate.SelectedDate == DateTime.UtcNow)
             {
                 return true;
             }
+            defaultDate = false;
             return false;
         }
 
@@ -172,7 +176,6 @@ namespace counterApp
         // also updates "oldDate" to ensure that we can return to the previous date if needed
         private void DateChange(object? sender, RoutedEventArgs e)
         {
-            Boolean defaultDate = IsDatePickerStillDefault();
             if (!DataExported && !dateReturned && !defaultDate)
             {
                 MessageBoxResult answer = MessageBox.Show("***Warning!***\n\nYou haven't yet exported the data for the date that is currently selected. Please make sure you export first. Click yes to change date anyway, or click no to go back.", "Export Warning!", MessageBoxButton.YesNo);
@@ -185,6 +188,7 @@ namespace counterApp
                 }
             }
             DateTime dateTime = DateExists();
+            defaultDate = false;
             FileCheck(GetFile(dateTime));
             LoadData(dateTime);
             return;
@@ -198,7 +202,7 @@ namespace counterApp
             {
                 if (DateExistsInFile(dateTime) >= 0)
                 {
-                    MessageBox.Show("This date exists in the file! Loading data.");
+                    if (!defaultDate) MessageBox.Show("This date exists in the file! Loading data.");
                     string[] data = GetData(dateTime);
                     if (data.Length < 7)
                     {
@@ -380,7 +384,7 @@ namespace counterApp
 
         // verify no file errors using returned string of FileCheck(); allows implementation of the same error dialog without repeating code
         // currently only needed in a few places but may need to be reused as program expands
-        private Boolean NoFileError(string temp)
+        private bool NoFileError(string temp)
         {
             if (temp == "Error!" && fileExists)
             {
@@ -409,7 +413,7 @@ namespace counterApp
             string[] linesInFile = GetFileAsArray(@path);
                 
             int index = 0;
-            Boolean dayExists = false;
+            bool dayExists = false;
             foreach (string line in linesInFile)
             {
                 string lineDate = line.Split(",")[0];
@@ -516,7 +520,7 @@ namespace counterApp
             
             if (System.IO.File.Exists(@filePath))
             {
-                Boolean dayExists = false;
+                bool dayExists = false;
                 FileCheck(@filePath);
                 //file is not locked, continue
                 
