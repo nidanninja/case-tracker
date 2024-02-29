@@ -76,7 +76,7 @@ namespace counterApp
             if (sw.IsRunning)
             {
                 sw.Stop();
-                elapsedtimeitem.Items.Add(currentTime);
+                elapsedtimeitem.Items.Insert(0, currentTime);
             }
             startbtn.Background = Brushes.MediumSpringGreen;
             stopbtn.Background = Brushes.Gray;
@@ -170,6 +170,11 @@ namespace counterApp
         // event handler for reset button; call default reset function
         private void Reset(object sender, RoutedEventArgs e)
         {
+            MessageBoxResult answer = MessageBox.Show("***Warning!***\n\nAre you sure you want to reset the data for today? Note that this will not modify the data for the given day in the output file unless you export after resetting.", "Reset Warning!", MessageBoxButton.YesNo);
+            if (answer == MessageBoxResult.No)
+            {
+                return;
+            }
             Reset();
         }
 
@@ -248,7 +253,7 @@ namespace counterApp
                     string[] data = GetData(dateTime);
                     if (data.Length < 7)
                     {
-                        MessageBox.Show("Unfortunately, the data from the file for this specific date seems to be corrupted. Please manually edit if necessary - there is not enough information to import successfully.");
+                        MessageBox.Show("Unfortunately, the data from the file for this specific date seems to be corrupted or missing. Please manually edit if necessary - there is not enough information to import successfully.");
                     }
                     DigitalCount.Text = data[1];
                     DigitalErrorCount.Text = data[2];
@@ -522,6 +527,14 @@ namespace counterApp
             int TotalErrors = (Int32.Parse(DigitalErrors) + Int32.Parse(FixedErrors) + Int32.Parse(RemovableErrors));
             //int TotalErrors = Int32.Parse(DigitalErrors + FixedErrors + RemovableErrors);
             double ErrorPercent = 0;
+
+            // time tracking
+            double timeSpent = (double)sw.Elapsed.Hours + ((double)sw.Elapsed.Minutes / 60) + ((double)sw.Elapsed.Seconds / 3600); // how many total hours worked on cases
+            timeSpent = Math.Round(timeSpent, 2); // rounded to the nearest 0.01 hours (36 second intervals)
+
+            double casesPerHour = 0;
+
+
             if (TotalCasesEntered != 0)
             {
                 ErrorPercent = (double)TotalErrors / TotalCasesEntered;
@@ -533,8 +546,14 @@ namespace counterApp
                 MessageBox.Show("You did not enter any cases, and the program will not be able to save your data. Please try again.");
                 return;
             }
-            var headerLine = "DATE,DIGITAL CASES,DIGITAL ERRORS,TRADITIONAL FIXED CASES,TRADITIONAL FIXED ERRORS,REMOVABLE CASES,REMOVABLE ERRORS,TOTAL CASES ENTERED,TOTAL ERRORS,ERROR PERCENT";
-            var caseLine = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}", editDay, DigitalCases, DigitalErrors, FixedCases, FixedErrors, RemovableCases, RemovableErrors, TotalCasesEntered.ToString(), TotalErrors.ToString(), ErrorPercent.ToString());
+            if (TotalCasesEntered != 0 && timeSpent != 0)
+            {
+                casesPerHour = (double)TotalCasesEntered / timeSpent;
+                casesPerHour = Math.Round(casesPerHour, 2);
+            }
+            // TODO: error percent, --> hours spent, cases per hour
+            var headerLine = "DATE,DIGITAL CASES,DIGITAL ERRORS,TRADITIONAL FIXED CASES,TRADITIONAL FIXED ERRORS,REMOVABLE CASES,REMOVABLE ERRORS,TOTAL CASES ENTERED,TOTAL ERRORS,ERROR PERCENT,TOTAL HOURS SPENT,CASES PER HOUR"; 
+            var caseLine = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}", editDay, DigitalCases, DigitalErrors, FixedCases, FixedErrors, RemovableCases, RemovableErrors, TotalCasesEntered.ToString(), TotalErrors.ToString(), ErrorPercent.ToString(), timeSpent.ToString(), casesPerHour.ToString());
 
 
             // var digitalLine = string.Format("{0},{1}", DigitalCases, DigitalErrors);
