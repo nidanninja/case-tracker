@@ -65,6 +65,7 @@ namespace counterApp
         }
         private void startbtn_Click(object sender, RoutedEventArgs e)
         {
+            DataExported = false;
             sw.Start();
             dt.Start();
             startbtn.Background = Brushes.Gray;
@@ -164,7 +165,11 @@ namespace counterApp
             RemovableErrorCount.Text = "0";
             FixedCount.Text = "0";
             FixedErrorCount.Text = "0";
-            DataExported = false;
+            // DataExported = false;
+            timeOffset = TimeSpan.Zero;
+            currentTime = String.Format("{0:00}:{1:00}:{2:00}",
+            timeOffset.Hours, timeOffset.Minutes, timeOffset.Seconds);
+            clocktxtblock.Text = currentTime;
         }
 
         // event handler for reset button; call default reset function
@@ -236,15 +241,10 @@ namespace counterApp
             }
             DateTime dateTime = DateExists();
             defaultDate = false;
+            DataExported = true;
             FileCheck(GetFile(dateTime));
             LoadData(dateTime);
             return;
-        }
-
-        // Adjust the time as necessary for loading stopwatch data
-        private void TimeSpanAdjust()
-        {
-            
         }
 
         // Load data for a specific day - primarily used with DateChange event trigger to check when date is changed
@@ -274,12 +274,12 @@ namespace counterApp
                     ts.Hours, ts.Minutes, ts.Seconds);
                     clocktxtblock.Text = currentTime;
 
-                    DataExported = false;
+                    // DataExported = false;
                 }
                 else
                 {
                     Reset();
-                    DataExported = false;
+                    // DataExported = false;
 
                 }
                 oldDate = dateTime;
