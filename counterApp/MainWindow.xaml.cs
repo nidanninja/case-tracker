@@ -41,9 +41,8 @@ namespace counterApp
         /// </summary>
         DispatcherTimer dt = new DispatcherTimer();  
         Stopwatch sw = new Stopwatch();
+        TimeSpan timeOffset = TimeSpan.Zero;
         string currentTime = string.Empty;
-
-
 
         public MainWindow()
         {
@@ -58,6 +57,7 @@ namespace counterApp
             if (sw.IsRunning)
             {
                 TimeSpan ts = sw.Elapsed;
+                ts += timeOffset;
                 currentTime = String.Format("{0:00}:{1:00}:{2:00}",
                 ts.Hours, ts.Minutes, ts.Seconds);
                 clocktxtblock.Text = currentTime;
@@ -241,6 +241,12 @@ namespace counterApp
             return;
         }
 
+        // Adjust the time as necessary for loading stopwatch data
+        private void TimeSpanAdjust()
+        {
+            
+        }
+
         // Load data for a specific day - primarily used with DateChange event trigger to check when date is changed
         // Check if date exists, and if so, load data into appropriate controls and display message to user
         private void LoadData(DateTime dateTime)
@@ -261,6 +267,13 @@ namespace counterApp
                     FixedErrorCount.Text = data[4];
                     RemovableCount.Text = data[5];
                     RemovableErrorCount.Text = data[6];
+                    timeOffset = TimeSpan.FromHours(Double.Parse(data[10]));
+                    // setting timer text to the correct time when loading
+                    TimeSpan ts = timeOffset;
+                    currentTime = String.Format("{0:00}:{1:00}:{2:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds);
+                    clocktxtblock.Text = currentTime;
+
                     DataExported = false;
                 }
                 else
@@ -496,6 +509,28 @@ namespace counterApp
             File.WriteAllLines(@path, linesInFile);
         }
 
+        private string[] SortFile(string[] linesInFile)
+        {
+            //Array.Sort(linesInFile,1,linesInFile.Length-1);
+            //var ordered = linesInFile.OrderBy(line => line.Split(",")[0]).ToList();
+            try
+            {
+                var ordered = linesInFile.Skip(1).OrderBy(line => DateTime.Parse(line.Split(",")[0])).ToList();
+                int sortIndex = 1;
+                foreach (var line in ordered)
+                {
+                    linesInFile[sortIndex] = line;
+                    sortIndex++;
+                }
+                return linesInFile;
+            }
+            catch (FormatException exception)
+            {
+                MessageBox.Show("The file seems to be missing date information for at least one of the saved days. \n\nIf this is your first time exporting, you can ignore this message and continue.");
+                return linesInFile;
+            }
+        }
+
         // export button event handler; contains all logic for exporting data and validation of data to be exported
         // saves data to "./CaseTracking/M-YYYY.csv" path from GetFile() return value
         // additionally calculates total cases and error percentage using user data
@@ -529,7 +564,10 @@ namespace counterApp
             double ErrorPercent = 0;
 
             // time tracking
-            double timeSpent = (double)sw.Elapsed.Hours + ((double)sw.Elapsed.Minutes / 60) + ((double)sw.Elapsed.Seconds / 3600); // how many total hours worked on cases
+            TimeSpan tempTime = sw.Elapsed + timeOffset;
+            // double timeSpent = (double)sw.Elapsed.Hours + ((double)sw.Elapsed.Minutes / 60) + ((double)sw.Elapsed.Seconds / 3600); // how many total hours worked on cases
+            double timeSpent = (double)tempTime.Hours + (double)tempTime.Minutes / 60 + (double)tempTime.Seconds / 3600;
+            
             timeSpent = Math.Round(timeSpent, 2); // rounded to the nearest 0.01 hours (36 second intervals)
 
             double casesPerHour = 0;
@@ -608,18 +646,9 @@ namespace counterApp
                         index++;
                     }
                 }
-                //Array.Sort(linesInFile,1,linesInFile.Length-1);
 
-                //var ordered = linesInFile.OrderBy(line => line.Split(",")[0]).ToList();
-
-                var ordered = linesInFile.Skip(1).OrderBy(line => DateTime.Parse(line.Split(",")[0])).ToList();
-
-                int sortIndex = 1;
-                foreach (var line in ordered)
-                {
-                    linesInFile[sortIndex] = line;
-                    sortIndex++;
-                }
+                if (linesInFile.Length > 1) SortFile(linesInFile);
+                
 
                 if (dayExists)
                 {
