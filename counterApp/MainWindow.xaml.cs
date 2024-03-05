@@ -167,9 +167,17 @@ namespace counterApp
             FixedErrorCount.Text = "0";
             // DataExported = false;
             timeOffset = TimeSpan.Zero;
+            if (sw.IsRunning)
+            {
+                sw.Reset();
+                sw.Stop();
+                startbtn.Background = Brushes.MediumSpringGreen;
+                stopbtn.Background = Brushes.Gray;
+            }
             currentTime = String.Format("{0:00}:{1:00}:{2:00}",
             timeOffset.Hours, timeOffset.Minutes, timeOffset.Seconds);
             clocktxtblock.Text = currentTime;
+            elapsedtimeitem.Items.Clear();
         }
 
         // event handler for reset button; call default reset function
