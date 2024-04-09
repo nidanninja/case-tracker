@@ -169,11 +169,11 @@ namespace counterApp
             timeOffset = TimeSpan.Zero;
             if (sw.IsRunning)
             {
-                sw.Reset();
                 sw.Stop();
                 startbtn.Background = Brushes.MediumSpringGreen;
                 stopbtn.Background = Brushes.Gray;
             }
+            sw.Reset();
             currentTime = String.Format("{0:00}:{1:00}:{2:00}",
             timeOffset.Hours, timeOffset.Minutes, timeOffset.Seconds);
             clocktxtblock.Text = currentTime;
