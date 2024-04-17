@@ -56,7 +56,7 @@ namespace counterApp
         {
             if (sw.IsRunning)
             {
-                TimeSpan ts = sw.Elapsed;
+                TimeSpan ts = sw.Elapsed * 60;
                 ts += timeOffset;
                 currentTime = String.Format("{0:00}:{1:00}:{2:00}",
                 ts.Hours, ts.Minutes, ts.Seconds);
@@ -269,6 +269,7 @@ namespace counterApp
                     {
                         MessageBox.Show("Unfortunately, the data from the file for this specific date seems to be corrupted or missing. Please manually edit if necessary - there is not enough information to import successfully.");
                     }
+                    Reset();
                     DigitalCount.Text = data[1];
                     DigitalErrorCount.Text = data[2];
                     FixedCount.Text = data[3];
@@ -572,7 +573,7 @@ namespace counterApp
             double ErrorPercent = 0;
 
             // time tracking
-            TimeSpan tempTime = sw.Elapsed + timeOffset;
+            TimeSpan tempTime = sw.Elapsed * 60 + timeOffset;
             // double timeSpent = (double)sw.Elapsed.Hours + ((double)sw.Elapsed.Minutes / 60) + ((double)sw.Elapsed.Seconds / 3600); // how many total hours worked on cases
             double timeSpent = (double)tempTime.Hours + (double)tempTime.Minutes / 60 + (double)tempTime.Seconds / 3600;
             
