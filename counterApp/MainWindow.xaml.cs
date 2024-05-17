@@ -26,7 +26,7 @@ namespace counterApp
     {
         // has data been exported yet for current date?
         private bool DataExported = false;
-        
+
         // does the file exist?
         private bool fileExists = false;
 
@@ -39,7 +39,7 @@ namespace counterApp
         /// <summary>
         /// adding a stopwatch feature to track time spent on case entry vs. on other tasks
         /// </summary>
-        DispatcherTimer dt = new DispatcherTimer();  
+        DispatcherTimer dt = new DispatcherTimer();
         Stopwatch sw = new Stopwatch();
         TimeSpan timeOffset = TimeSpan.Zero;
         string currentTime = string.Empty;
@@ -56,7 +56,7 @@ namespace counterApp
         {
             if (sw.IsRunning)
             {
-                TimeSpan ts = sw.Elapsed * 60;
+                TimeSpan ts = sw.Elapsed;
                 ts += timeOffset;
                 currentTime = String.Format("{0:00}:{1:00}:{2:00}",
                 ts.Hours, ts.Minutes, ts.Seconds);
@@ -96,6 +96,21 @@ namespace counterApp
             {
                 Main_Window.Topmost = false;
                 // Main_Window.Activate(); // this line has been removed, as this would cause the taskbar icon to flash repeatedly
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!DataExported)
+            {
+                MessageBox.Show("You haven't exported your data yet! Make sure you save before closing the app. Click close again to ignore this warning.");
+                e.Cancel = true;
+                DataExported = true;
+                return;
+            }
+            else
+            {
+                e.Cancel = false;
             }
         }
 
@@ -191,6 +206,28 @@ namespace counterApp
             Reset();
         }
 
+        private void SetDueDates()
+        {
+            DateTime adjustableDate;
+            DateTime currentDate;
+            try
+            {
+                currentDate = EditDate.SelectedDate.Value;
+            } catch (Exception exc) 
+            {
+                currentDate = DateTime.Now;
+            }
+            adjustableDate = currentDate.AddDays(10);
+            if (adjustableDate.DayOfWeek == DayOfWeek.Saturday) adjustableDate = adjustableDate.AddDays(1);
+            if (adjustableDate.DayOfWeek == DayOfWeek.Sunday) adjustableDate = adjustableDate.AddDays(1);
+            EarlyDate.Text = adjustableDate.ToShortDateString();
+            if (nearbyOffice) adjustableDate = currentDate.AddDays(13);
+            else if (!nearbyOffice) adjustableDate = currentDate.AddDays(14);
+            if (adjustableDate.DayOfWeek == DayOfWeek.Saturday) adjustableDate = adjustableDate.AddDays(1);
+            if (adjustableDate.DayOfWeek == DayOfWeek.Sunday) adjustableDate = adjustableDate.AddDays(1);
+            NormalDate.Text = adjustableDate.ToShortDateString();
+        }
+
         // has the date been returned back to the previous date (after attempting to change date without export)?
         private bool dateReturned = false;
 
@@ -205,6 +242,20 @@ namespace counterApp
                 EditDate.SelectedDate = oldDate.Date;
                 EditDate.SelectedDateChanged += DateChange;
             }
+        }
+
+        private bool nearbyOffice = false;
+
+        private void Nearby_On(object sender, EventArgs e)
+        {
+            nearbyOffice = true;
+            SetDueDates();
+        }
+
+        private void Nearby_Off(object sender, EventArgs e) 
+        {
+            nearbyOffice = false;
+            SetDueDates();
         }
 
         // same as previous SetDatePicker() but set to a specific date rather than previous
@@ -282,7 +333,6 @@ namespace counterApp
                     currentTime = String.Format("{0:00}:{1:00}:{2:00}",
                     ts.Hours, ts.Minutes, ts.Seconds);
                     clocktxtblock.Text = currentTime;
-
                     // DataExported = false;
                 }
                 else
@@ -291,6 +341,7 @@ namespace counterApp
                     // DataExported = false;
 
                 }
+                SetDueDates();
                 oldDate = dateTime;
                 dateReturned = false;
             }
@@ -573,7 +624,7 @@ namespace counterApp
             double ErrorPercent = 0;
 
             // time tracking
-            TimeSpan tempTime = sw.Elapsed * 60 + timeOffset;
+            TimeSpan tempTime = sw.Elapsed + timeOffset;
             // double timeSpent = (double)sw.Elapsed.Hours + ((double)sw.Elapsed.Minutes / 60) + ((double)sw.Elapsed.Seconds / 3600); // how many total hours worked on cases
             double timeSpent = (double)tempTime.Hours + (double)tempTime.Minutes / 60 + (double)tempTime.Seconds / 3600;
             

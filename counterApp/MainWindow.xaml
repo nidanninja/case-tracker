@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:counterApp"
         mc:Ignorable="d"
         Deactivated="Window_Deactivated"
+        Closing="Window_Closing"
         x:Name="Main_Window"
         Title="MainWindow" Height="450" Width="800">
 
@@ -23,7 +24,7 @@
                 </Viewbox>
             </Canvas>
             <Canvas Margin="205,103,364,10">
-                <Button Content="+1 Fixed" FontSize="29" Click="IncrementFixed" Height="100" Canvas.Top="168" Width="190"/>
+                <Button Content="+1 Fixed" FontSize="29" Click="IncrementFixed" Height="100" Canvas.Top="169" Width="190" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBox x:Name="FixedCount" TextWrapping="Wrap" Text="0" FontSize="60" TextAlignment="Center" Height="101" Canvas.Top="62" Width="190"/>
                 <TextBlock x:Name="FixedErrorCount" TextWrapping="Wrap" Text="0" FontSize="45" TextAlignment="Center" Height="101" Canvas.Left="48" Width="94"/>
                 <Button Content="+1 Error" FontSize="20" Click="IncrementFixedError" Height="35" Canvas.Top="268" Width="190"/>
@@ -47,6 +48,11 @@
             <Button Content="Info" FontSize="20" Margin="10,10,608,349" Click="InfoPopup"/>
             <DatePicker x:Name="EditDate" HorizontalAlignment="Left" Margin="218,10,0,0" VerticalAlignment="Top" Height="44" Width="120" SelectedDateChanged="DateChange" />
             <Button Content="Reset" FontSize="22" Margin="682,120,10,239" Click="Reset"/>
+            <TextBlock HorizontalAlignment="Left" Margin="606,223,0,0" TextWrapping="Wrap" Text="&quot;Early&quot; due date:" VerticalAlignment="Top" Height="25" Width="143"/>
+            <TextBlock HorizontalAlignment="Left" Margin="606,287,0,0" TextWrapping="Wrap" Text="Expected delivery date:    (7 business days + ship)" VerticalAlignment="Top" Height="35" Width="143"/>
+            <TextBlock x:Name="EarlyDate" Margin="606,253,10,0" TextWrapping="Wrap" Text="Early Date" VerticalAlignment="Top" Height="29"/>
+            <TextBlock x:Name="NormalDate" HorizontalAlignment="Left" Margin="606,342,0,0" TextWrapping="Wrap" Text="Normal Date" VerticalAlignment="Top" Width="143" Height="29"/>
+            <CheckBox Content="Nearby Office?" HorizontalAlignment="Left" Margin="606,322,0,0" VerticalAlignment="Top" Checked="Nearby_On" Unchecked="Nearby_Off"/>
 
         </Grid>
     </Viewbox>
